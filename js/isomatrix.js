@@ -18,6 +18,7 @@ function setupTriangle() {
 		
 	isomatrix_background([],"velocity");
 	drawTriangle(width);
+	isomatrix_fixedpoint(width);
 	
 	getPayoff();
 	
@@ -75,9 +76,10 @@ function determineThresholds(values,vi){
 		max = (values[i] > max) ? values[i] : max;
 	}
 	var limits = [min,max];	
-	var BINS = 16; // should be even
+	var BINS = 8; // should be even
 	
 	if (vi>0) {
+		BINS = BINS*2;
 		var myMax = Math.max(...[-min,max]);
 		limits= [-myMax*(1 + 4/BINS),myMax*(1 + 4/BINS)];
 	}
@@ -173,6 +175,7 @@ function isomatrix_background(vi,type) {
 	    .thresholds(thresholds);
 	    
 
+		// interpolateYlGnBu or, interpolateSpectral
 	var color = d3.scaleLinear().domain(d3.extent(thresholds)).interpolate(function() { return d3.interpolateYlGnBu; });
 
 	if (vi>0) {
@@ -221,4 +224,63 @@ function getPayoff(randomize) {
 	return (randomize) ? isomatrix_background([],"velocity") : A;
 }
 
+
+
+
+
+// draw fixed points on the edge of triangle   
+function isomatrix_fixedpoint(width) {
+	
+	var A = getPayoff();
+	
+	
+	var svg = d3.select("svg");
+/* 	svg.selectAll("line").remove(); */
+	
+	var b1 = 0.05*width;
+	var b2 = b1*Math.tan(Math.PI/6);
+	
+	var m = width/10;
+	var H = (width/2-m)*Math.tan(Math.PI/3);
+	var y0 = (width - H)/2; // center triangle in svg vertically
+	var x1 = [0.5*width, width-H-y0]; // top corner
+	var x2 = [m,width-y0]; // left corner
+	var x3 = [(width-m),(width-y0)]; //right corner
+	
+	// 1 - 2
+	var x1_12 = [x1[0]-b1, x1[1]-b2];
+	var x2_12 = [x2[0]-b1, x2[1]-b2];
+	
+    var lineGenerator = d3.line();
+    var pathString = lineGenerator([x1_12,x2_12]);
+    svg.append('path')
+			.attr('d', pathString)
+			.style("stroke","#000000")
+		  	.style("stroke-width",5)
+		  	.style("fill", "none");
+		  	
+	// 2 - 3
+	var x2_23 = [x2[0], x2[1]+b1];
+	var x3_23 = [x3[0], x3[1]+b1];
+	
+    var lineGenerator = d3.line();
+    var pathString = lineGenerator([x2_23,x3_23]);
+    svg.append('path')
+		.attr('d', pathString)
+		.style("stroke","#000000")
+	  	.style("stroke-width",5)
+	  	.style("fill", "none");
+	  	
+	// 1 - 3
+	var x1_13 = [x1[0]+b1, x1[1]-b2];
+	var x3_13 = [x3[0]+b1, x3[1]-b2];
+	
+    var lineGenerator = d3.line();
+    var pathString = lineGenerator([x1_13,x3_13]);
+    svg.append('path')
+		.attr('d', pathString)
+		.style("stroke","#000000")
+	  	.style("stroke-width",5)
+	  	.style("fill", "none");
+}
 
