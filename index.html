@@ -24,6 +24,7 @@
 		
 		<title>CelluWar</title>
 		<script src="https://d3js.org/d3.v7.min.js"></script>
+	    <script src="./js/download.js" charset="utf-8"></script>
 	    <script src="./js/isomatrix.js" charset="utf-8"></script>
 		<link href="./style.css" rel="stylesheet">
 
@@ -77,18 +78,18 @@
 				</br>
 				
 				<h4>Velocity</h4>
-				<input type="button" id="game-button" name="new-game" value="dX/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity([])"></input>
-				<input type="button" id="game-button" name="new-game" value="dX1/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(1)"></input> 
-				<input type="button" id="game-button" name="new-game" value="dX2/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(2)"></input> 
-				<input type="button" id="game-button" name="new-game" value="dX3/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(3)"></input>
+				<input type="button" id="game-button" name="new-game" value="dX/dt" class="btn btn-success btn-lg" onclick="isomatrix_background([],'velocity')"></input>
+				<input type="button" id="game-button" name="new-game" value="dX1/dt" class="btn btn-success btn-lg" onclick="isomatrix_background(1,'velocity')"></input> 
+				<input type="button" id="game-button" name="new-game" value="dX2/dt" class="btn btn-success btn-lg" onclick="isomatrix_background(2,'velocity')"></input> 
+				<input type="button" id="game-button" name="new-game" value="dX3/dt" class="btn btn-success btn-lg" onclick="isomatrix_background(3,'velocity')"></input>
 				
 				</br></br>
 				
 				<h4>Fitness</h4>
-				<input type="button" id="game-button" name="new-game" value="phi" class="btn btn-success btn-lg" onclick="isomatrix_fitness([])"></input>
-				<input type="button" id="game-button" name="new-game" value="f1" class="btn btn-success btn-lg" onclick="isomatrix_fitness(1)"></input> 
-				<input type="button" id="game-button" name="new-game" value="f2" class="btn btn-success btn-lg" onclick="isomatrix_fitness(2)"></input> 
-				<input type="button" id="game-button" name="new-game" value="f3" class="btn btn-success btn-lg" onclick="isomatrix_fitness(3)"></input>
+				<input type="button" id="game-button" name="new-game" value="phi" class="btn btn-success btn-lg" onclick="isomatrix_background([],'fitness')"></input>
+				<input type="button" id="game-button" name="new-game" value="f1" class="btn btn-success btn-lg" onclick="isomatrix_background(1,'fitness')"></input> 
+				<input type="button" id="game-button" name="new-game" value="f2" class="btn btn-success btn-lg" onclick="isomatrix_background(2,'fitness')"></input> 
+				<input type="button" id="game-button" name="new-game" value="f3" class="btn btn-success btn-lg" onclick="isomatrix_background(3,'fitness')"></input>
 				
 				
 

@@ -16,10 +16,19 @@ function setupTriangle() {
          .attr("width", width + "px")
          .attr("height", width + "px");
 		
-	isomatrix_velocity([]);
+	isomatrix_background([],"velocity");
 	drawTriangle(width);
 	
 	getPayoff();
+	
+	d3.select("body").append("button")
+        .attr("type","button")
+        .attr("class", "downloadButton")
+        .text("Download SVG")
+        .on("click", function() {
+            // download the svg
+            downloadSVG();
+        });
 }
 
 // draw the black lines of the triangle:
@@ -57,7 +66,7 @@ function drawTriangle(width) {
 		  	.style("fill", "none");
 }
 	    
-    
+// determine limits of color bar for contours (velocity, fitness bkgd coloring)  
 function determineThresholds(values,vi){
 	var min = 10000;
 	var max = -min;
@@ -65,19 +74,13 @@ function determineThresholds(values,vi){
 		min = (values[i] < min) ? values[i] : min;
 		max = (values[i] > max) ? values[i] : max;
 	}
-	var limits = [min,max];
-	
-	
+	var limits = [min,max];	
 	var BINS = 16; // should be even
 	
 	if (vi>0) {
 		var myMax = Math.max(...[-min,max]);
-		console.log(Math.max(...[-min,max]));
 		limits= [-myMax*(1 + 4/BINS),myMax*(1 + 4/BINS)];
 	}
-	
-	
-	
 	var thresholds = d3.range(1, BINS)
 	    .map(function(p) {
 		    limit = p/(BINS)*(limits[1]-limits[0]) + limits[0];	    
@@ -88,13 +91,10 @@ function determineThresholds(values,vi){
 }
 
 // See https://en.wikipedia.org/wiki/Test_functions_for_optimization
-function isomatrix_velocity(vi) {
+function isomatrix_background(vi,type) {
 	
 	var A = getPayoff();
 	var n = 240, m = 240;
-	
-	
-
 	var mar = 0.1; // fractional margin
 	var Hp = (0.5-mar)* Math.tan(Math.PI/3);
 	var y0 = (1 - Hp)/2;
@@ -118,26 +118,50 @@ function isomatrix_velocity(vi) {
 		var f2 = (A[0+3] - A[2+3] )*P + (A[1+3] - A[2+3])*Q + A[2+3];
 		var f3 = (A[0+6] - A[2+6] )*P + (A[1+6] - A[2+6])*Q + A[2+6];
 		var phi = P*f1 + Q*f2 + (1 - P - Q)*f3;
-		var Z1 = P*(f1-phi);
-		var Z2 = Q*(f2-phi);
-		var Z3 = (1 - P - Q)*(f3-phi);    
-		var Z = Math.sqrt(Z1*Z1 + Z2*Z2 + Z3*Z3);
-		var Zfocal = Z;
 		
-		// choose which:
-		if (vi == 1) {
-			Zfocal=Z1;
-		} else if (vi == 2){
-			Zfocal=Z2;
-		} else if (vi == 3){
-			Zfocal=Z3;
-		}
+		if (type == "velocity") {
+			var Z1 = P*(f1-phi);
+			var Z2 = Q*(f2-phi);
+			var Z3 = (1 - P - Q)*(f3-phi);    
+			var Z = Math.sqrt(Z1*Z1 + Z2*Z2 + Z3*Z3);
+			var Zfocal = Z;
+			
+			// choose which:
+			if (vi == 1) {
+				Zfocal=Z1;
+			} else if (vi == 2){
+				Zfocal=Z2;
+			} else if (vi == 3){
+				Zfocal=Z3;
+			}
+			
+			// don't draw if outside of circle
+			Z = ((P<0) || (P>1)) ? NaN : Z;
+			Z = ((Q<0) || (Q>1)) ? NaN : Z;
+			Z = (P + Q > 1) ? NaN : Z;
+			
+			values[k] = isNaN(Z) ? 0 : Zfocal;
+		} else if (type == "fitness") {
+			
+			var Zfocal = phi;
+			
+			// choose which:
+			if (vi == 1) {
+				Zfocal=f1;
+			} else if (vi == 2){
+				Zfocal=f2;
+			} else if (vi == 3){
+				Zfocal=f3;
+			}
+			
+			// don't draw if outside of circle
+			Zfocal = ((P<0) || (P>1)) ? NaN : Zfocal;
+			Zfocal = ((Q<0) || (Q>1)) ? NaN : Zfocal;
+			Zfocal = (P + Q > 1) ? NaN : Zfocal;
+			
+			values[k] = isNaN(Zfocal) ? 0 : Zfocal;
+		} // end fitness
 		
-		// don't draw if outside of circle
-		Z = ((P<0) || (P>1)) ? NaN : Z;
-		Z = ((Q<0) || (Q>1)) ? NaN : Z;
-		Z = (P + Q > 1) ? NaN : Z;
-		values[k] = isNaN(Z) ? 0 : Zfocal;
 	  }
 	}
 	
@@ -194,7 +218,7 @@ function getPayoff(randomize) {
 	  }
 	}
 	
-	return (randomize) ? isomatrix_velocity([]) : A;
+	return (randomize) ? isomatrix_background([],"velocity") : A;
 }
 
 
