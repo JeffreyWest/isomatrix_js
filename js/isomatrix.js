@@ -67,7 +67,7 @@ function drawTriangle(width) {
 }
 	    
     
-function determineThresholds(values,partial){
+function determineThresholds(values,vi){
 	var min = 10000;
 	var max = -min;
 	for (var i = 0; i < values.length; i++) {
@@ -76,17 +76,20 @@ function determineThresholds(values,partial){
 	}
 	var limits = [min,max];
 	
-	if (partial) {
+	
+	var BINS = 16; // should be even
+	
+	if (vi>0) {
 		var myMax = Math.max(...[-min,max]);
-		limits= [-myMax,myMax];
+		console.log(Math.max(...[-min,max]));
+		limits= [-myMax*(1 + 4/BINS),myMax*(1 + 4/BINS)];
 	}
 	
-	var BINS = 11;
 	
-	var thresholds = d3.range(1, BINS+1)
+	
+	var thresholds = d3.range(1, BINS)
 	    .map(function(p) {
-		    //limit = (p)/BINS*(limits[1]);	 
-		    limit = (p)/(BINS+1)*(limits[1]-limits[0]) + limits[0];	    
+		    limit = p/(BINS)*(limits[1]-limits[0]) + limits[0];	    
 		    return limit; 
 		});
 	
@@ -152,12 +155,9 @@ function isomatrix_velocity(vi) {
 	
 	//////////////////////////////////////////////////
 	// draw the contours:
-	var thresholds = determineThresholds(values,true);	
+	var thresholds = determineThresholds(values,vi);	
 	console.log("thresholds: " + thresholds);
-	
-	var myDomain = [thresholds[0],thresholds[(thresholds.length-1)/2],thresholds[thresholds.length-1]];
-	console.log("domain: " + myDomain);
-	
+		
 	var contours = d3.contours()
 	    .size([n, m])
 	    .thresholds(thresholds);
@@ -166,6 +166,8 @@ function isomatrix_velocity(vi) {
 	var color = d3.scaleLinear().domain(d3.extent(thresholds)).interpolate(function() { return d3.interpolateYlGnBu; });
 
 	if (vi>0) {
+		var myDomain = [thresholds[0],thresholds[(thresholds.length-1)/2],thresholds[thresholds.length-1]];
+		console.log(myDomain);
 		color = d3.scaleLinear().domain(myDomain).range(['#008dde','#fffdfb','#de0006']);
 	}
 	
