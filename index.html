@@ -43,17 +43,7 @@
 		<h1 style="margin-bottom: 30px;"> IsoMaTrix </h1>
 			
 		<div class="row" style="margin-top: 30px;">
-			<div class="col-lg-6 offset-1 col-md-12 text-justify" id="game-div">
-				
-				<div class="row">
-					<div class="col-12">
-						<input type="button" id="game-button" name="new-game" value="dX/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity([])"></input>
-						<input type="button" id="game-button" name="new-game" value="dX1/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(1)"></input> 
-						<input type="button" id="game-button" name="new-game" value="dX2/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(2)"></input> 
-						<input type="button" id="game-button" name="new-game" value="dX3/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(3)"></input> 
-
-					</div>
-				</div>
+			<div class="col-6 text-justify" id="game-div">
 				<div class="row" style="margin-top: 30px;">
 					<div class="col-12">
 						<div class="board">
@@ -62,7 +52,53 @@
 					</div>
 				</div>
 			</div>
+			
+			<div class="col-5 offset-1">
+				<h4>Payoff</h4>
+				<input type="button" id="game-button" name="randomA" value="Randomize" class="btn btn-success btn-lg" onclick="getPayoff(true)"></input></br></br>
+
+				  <div class="well well-lg">
+				  <!-- default: A=[0.8,0.9,0.3, 0.9,0.6,0.5, 0.1,0.0,1]; -->
+				    <form id="inputField" role="form">
+				      <input type="text" id="field00" value="0.8" size="3">
+				      <input type="text" id="field01" value="0.9" size="3">
+				      <input type="text" id="field02" value="0.3" size="3">
+				      <br>
+				      <input type="text" id="field10" value="0.9" size="3">
+				      <input type="text" id="field11" value="0.6" size="3">
+				      <input type="text" id="field12" value="0.5" size="3">
+				      <br>
+				      <input type="text" id="field20" value="0.1" size="3">
+				      <input type="text" id="field21" value="0.0" size="3">
+				      <input type="text" id="field22" value="1.0" size="3">
+				    </form>
+				  </div>
+
+				</br>
+				
+				<h4>Velocity</h4>
+				<input type="button" id="game-button" name="new-game" value="dX/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity([])"></input>
+				<input type="button" id="game-button" name="new-game" value="dX1/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(1)"></input> 
+				<input type="button" id="game-button" name="new-game" value="dX2/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(2)"></input> 
+				<input type="button" id="game-button" name="new-game" value="dX3/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(3)"></input>
+				
+				</br></br>
+				
+				<h4>Fitness</h4>
+				<input type="button" id="game-button" name="new-game" value="phi" class="btn btn-success btn-lg" onclick="isomatrix_fitness([])"></input>
+				<input type="button" id="game-button" name="new-game" value="f1" class="btn btn-success btn-lg" onclick="isomatrix_fitness(1)"></input> 
+				<input type="button" id="game-button" name="new-game" value="f2" class="btn btn-success btn-lg" onclick="isomatrix_fitness(2)"></input> 
+				<input type="button" id="game-button" name="new-game" value="f3" class="btn btn-success btn-lg" onclick="isomatrix_fitness(3)"></input>
+				
+				
+
+			</div>
+			
+			
 		</div>
+		
+		
+		
 		
 		
 		<div class="row" style="margin-bottom: 150px; margin-top: 50px;">

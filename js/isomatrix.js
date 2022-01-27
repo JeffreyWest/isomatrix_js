@@ -15,20 +15,11 @@ function setupTriangle() {
     var svg = div.append("svg")
          .attr("width", width + "px")
          .attr("height", width + "px");
-	
-	
-	
-	isomatrix_velocity(3);
-	
-	
-	
-	
-	
-	
-	
-	
-	  
+		
+	isomatrix_velocity([]);
 	drawTriangle(width);
+	
+	getPayoff();
 }
 
 // draw the black lines of the triangle:
@@ -99,13 +90,10 @@ function determineThresholds(values,vi){
 // See https://en.wikipedia.org/wiki/Test_functions_for_optimization
 function isomatrix_velocity(vi) {
 	
+	var A = getPayoff();
 	var n = 240, m = 240;
 	
-	// payoff:
-	A1=[0.8147,0.9134,0.2785];
-    A2=[0.9058,0.6324,0.5469];
-    A3=[0.1270,0.0975,0.9575];
-//     A=[A1;A2;A3];
+	
 
 	var mar = 0.1; // fractional margin
 	var Hp = (0.5-mar)* Math.tan(Math.PI/3);
@@ -126,9 +114,9 @@ function isomatrix_velocity(vi) {
 		// P, Q is from the coordinate transformation (x1,x2,x3) -> (P,Q,1-P-Q)	
 		Q = P * (Math.sin(Math.PI/3) / Math.tan(Math.PI/3)) + 1 - P - xP;
 		
-		var f1 = (A1[0] - A1[2] )*P + (A1[1] - A1[2])*Q + A1[2];
-		var f2 = (A2[0] - A2[2] )*P + (A2[1] - A2[2])*Q + A2[2];
-		var f3 = (A3[0] - A3[2] )*P + (A3[1] - A3[2])*Q + A3[2];
+		var f1 = (A[0] - A[2] )*P + (A[1] - A[2])*Q + A[2];
+		var f2 = (A[0+3] - A[2+3] )*P + (A[1+3] - A[2+3])*Q + A[2+3];
+		var f3 = (A[0+6] - A[2+6] )*P + (A[1+6] - A[2+6])*Q + A[2+6];
 		var phi = P*f1 + Q*f2 + (1 - P - Q)*f3;
 		var Z1 = P*(f1-phi);
 		var Z2 = Q*(f2-phi);
@@ -155,9 +143,7 @@ function isomatrix_velocity(vi) {
 	
 	//////////////////////////////////////////////////
 	// draw the contours:
-	var thresholds = determineThresholds(values,vi);	
-	console.log("thresholds: " + thresholds);
-		
+	var thresholds = determineThresholds(values,vi);			
 	var contours = d3.contours()
 	    .size([n, m])
 	    .thresholds(thresholds);
@@ -167,7 +153,6 @@ function isomatrix_velocity(vi) {
 
 	if (vi>0) {
 		var myDomain = [thresholds[0],thresholds[(thresholds.length-1)/2],thresholds[thresholds.length-1]];
-		console.log(myDomain);
 		color = d3.scaleLinear().domain(myDomain).range(['#008dde','#fffdfb','#de0006']);
 	}
 	
@@ -187,3 +172,29 @@ function isomatrix_velocity(vi) {
 	drawTriangle(width);
 
 }
+
+
+function getPayoff(randomize) {
+	var myArr = document.forms.inputField;
+	var myControls = myArr;
+	var A = [];
+	for (var i = 0; i < myControls.length; i++) {
+	  var aControl = myControls[i];
+	  
+	  if (randomize) {
+		  var Aij = (Math.random(1)).toFixed(1);
+		  A.push(isNaN(Aij) ? 0 : Aij);		  
+		  document.getElementById(aControl.id).value = Aij;
+	  } else {
+		  // don't print the button value
+		  if (aControl.type != "button") {
+		    var Aij = parseFloat(aControl.value);
+		    A.push(isNaN(Aij) ? 0 : Aij);
+		  }
+	  }
+	}
+	
+	return (randomize) ? isomatrix_velocity([]) : A;
+}
+
+
