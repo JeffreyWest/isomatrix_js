@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html class="jeffrey">
+	<head>
+		
+		<meta charset="utf-8">
+		
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@mathoncbro">
+		<meta name="twitter:creator" content="@mathoncbro">
+		<meta name="twitter:title" content="CelluWar: 2 player extension of Conway's Game of Life">
+		<meta name="twitter:description" content="The fun and challenging 2 player extension of Conway's Game of Life.">
+		<meta name="twitter:image" content="https://jeffreywest.github.io/celluwar/img/preview.png">
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		
+		<!-- add github ribbon -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+		
+		
+		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		
+		
+		<title>CelluWar</title>
+		<script src="https://d3js.org/d3.v7.min.js"></script>
+	    <script src="./js/isomatrix.js" charset="utf-8"></script>
+		<link href="./style.css" rel="stylesheet">
+
+	</head>
+
+	<header>
+		<aside>January, 2022 </aside> Jeffrey West / CelluWar
+	</header>
+
+
+	
+<body>
+	<a class="github-fork-ribbon" href="https://github.com/jeffreywest/celluwar" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+	
+	<div class="main" id="main">
+	
+		<h1 style="margin-bottom: 30px;"> IsoMaTrix </h1>
+			
+		<div class="row" style="margin-top: 30px;">
+			<div class="col-lg-6 offset-1 col-md-12 text-justify" id="game-div">
+				
+				<div class="row">
+					<div class="col-12">
+						<input type="button" id="game-button" name="new-game" value="dX/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity([])"></input>
+						<input type="button" id="game-button" name="new-game" value="dX1/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(1)"></input> 
+						<input type="button" id="game-button" name="new-game" value="dX2/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(2)"></input> 
+						<input type="button" id="game-button" name="new-game" value="dX3/dt" class="btn btn-success btn-lg" onclick="isomatrix_velocity(3)"></input> 
+
+					</div>
+				</div>
+				<div class="row" style="margin-top: 30px;">
+					<div class="col-12">
+						<div class="board">
+							<!-- Game board will be rendered here (d3.js) -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+		<div class="row" style="margin-bottom: 150px; margin-top: 50px;">
+			<div class="col-lg-8 offset-1 col-md-10 text-justify">
+				<p>This website was created by Jeffrey West in 2022. </p>
+			</div>
+		</div>
+		
+		
+	</div>
+	
+	
+	
+	<script>
+		setupTriangle();
+	</script>
+</body>
+</html>
