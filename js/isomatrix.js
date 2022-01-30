@@ -17,10 +17,9 @@ function setupTriangle() {
          .attr("height", width + "px");
 		
 	isomatrix_background([],"velocity");
-	drawTriangle(width);
-	isomatrix_fixedpoint(width);
+	drawTriangle();
+	isomatrix_fixedpoint();
 	
-	getPayoff();
 	
 	d3.select("body").append("button")
         .attr("type","button")
@@ -32,65 +31,9 @@ function setupTriangle() {
         });
 }
 
-// draw the black lines of the triangle:
-function drawTriangle(width) {
-	var svg = d3.select("svg");
-	svg.selectAll("line").remove();
-	
-	var m = width/10;
-	var H = (width/2-m)*Math.tan(Math.PI/3);
-	var y0 = (width - H)/2; // center triangle in svg vertically
-	var x1 = [0.5*width, width-H-y0]; // top corner
-	var x2 = [m,width-y0]; // left corner
-	var x3 = [(width-m),(width-y0)]; //right corner
-			
-	var data = [x1,x2,x3,x1,x2];
-         var lineGenerator = d3.line();
-         var pathString = lineGenerator(data);
-         svg.append('path')
-			.attr('d', pathString)
-			.style("stroke","#000000")
-		  	.style("stroke-width",5)
-		  	.style("fill", "none");
 
-	var y1 = [0,0];
-	var y2 = [0,width];
-	var y4 = [width,0];
-	var y3 = [width,width];
-	var data = [y1,y2,y3,y4,y1];
-         var lineGenerator = d3.line();
-         var pathString = lineGenerator(data);
-         svg.append('path')
-			.attr('d', pathString)
-			.style("stroke","#000000")
-		  	.style("stroke-width",5)
-		  	.style("fill", "none");
-}
 	    
-// determine limits of color bar for contours (velocity, fitness bkgd coloring)  
-function determineThresholds(values,vi){
-	var min = 10000;
-	var max = -min;
-	for (var i = 0; i < values.length; i++) {
-		min = (values[i] < min) ? values[i] : min;
-		max = (values[i] > max) ? values[i] : max;
-	}
-	var limits = [min,max];	
-	var BINS = 8; // should be even
-	
-	if (vi>0) {
-		BINS = BINS*2;
-		var myMax = Math.max(...[-min,max]);
-		limits= [-myMax*(1 + 4/BINS),myMax*(1 + 4/BINS)];
-	}
-	var thresholds = d3.range(1, BINS)
-	    .map(function(p) {
-		    limit = p/(BINS)*(limits[1]-limits[0]) + limits[0];	    
-		    return limit; 
-		});
-	
-	return thresholds;
-}
+
 
 // See https://en.wikipedia.org/wiki/Test_functions_for_optimization
 function isomatrix_background(vi,type) {
@@ -196,91 +139,120 @@ function isomatrix_background(vi,type) {
 	    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
 	    .attr("fill", function(d) { return color(d.value); });
 	
-	drawTriangle(width);
+	// re-draw the fixedpoints (not always necessary)
+	isomatrix_fixedpoint(width);
 
 }
 
 
-function getPayoff(randomize) {
-	var myArr = document.forms.inputField;
-	var myControls = myArr;
-	var A = [];
-	for (var i = 0; i < myControls.length; i++) {
-	  var aControl = myControls[i];
-	  
-	  if (randomize) {
-		  var Aij = (Math.random(1)).toFixed(1);
-		  A.push(isNaN(Aij) ? 0 : Aij);		  
-		  document.getElementById(aControl.id).value = Aij;
-	  } else {
-		  // don't print the button value
-		  if (aControl.type != "button") {
-		    var Aij = parseFloat(aControl.value);
-		    A.push(isNaN(Aij) ? 0 : Aij);
-		  }
-	  }
-	}
-	
-	return (randomize) ? isomatrix_background([],"velocity") : A;
-}
+
 
 
 
 
 
 // draw fixed points on the edge of triangle   
-function isomatrix_fixedpoint(width) {
+function isomatrix_fixedpoint() {
+	
+	var svg = d3.select("svg");
+	svg.selectAll("line").remove(); // remove all lines
+	svg.selectAll("circle").remove(); // remove all fixed points
+	var width =document.getElementById("game-div").offsetWidth;
+
+	drawTriangle(); // redraw base triangle, bc we just deleted it
+	
 	
 	var A = getPayoff();
 	
-	
-	var svg = d3.select("svg");
-/* 	svg.selectAll("line").remove(); */
-	
+	// some parameters for describing corners:
 	var b1 = 0.05*width;
 	var b2 = b1*Math.tan(Math.PI/6);
+	var x1 = UVW_to_XY([1,0,0]);
+	var x2 = UVW_to_XY([0,1,0]);
+	var x3 = UVW_to_XY([0,0,1]);  	
 	
-	var m = width/10;
-	var H = (width/2-m)*Math.tan(Math.PI/3);
-	var y0 = (width - H)/2; // center triangle in svg vertically
-	var x1 = [0.5*width, width-H-y0]; // top corner
-	var x2 = [m,width-y0]; // left corner
-	var x3 = [(width-m),(width-y0)]; //right corner
-	
-	// 1 - 2
-	var x1_12 = [x1[0]-b1, x1[1]-b2];
-	var x2_12 = [x2[0]-b1, x2[1]-b2];
-	
-    var lineGenerator = d3.line();
-    var pathString = lineGenerator([x1_12,x2_12]);
-    svg.append('path')
-			.attr('d', pathString)
-			.style("stroke","#000000")
-		  	.style("stroke-width",5)
-		  	.style("fill", "none");
-		  	
-	// 2 - 3
-	var x2_23 = [x2[0], x2[1]+b1];
-	var x3_23 = [x3[0], x3[1]+b1];
-	
-    var lineGenerator = d3.line();
-    var pathString = lineGenerator([x2_23,x3_23]);
-    svg.append('path')
-		.attr('d', pathString)
-		.style("stroke","#000000")
-	  	.style("stroke-width",5)
-	  	.style("fill", "none");
-	  	
-	// 1 - 3
-	var x1_13 = [x1[0]+b1, x1[1]-b2];
-	var x3_13 = [x3[0]+b1, x3[1]-b2];
-	
-    var lineGenerator = d3.line();
-    var pathString = lineGenerator([x1_13,x3_13]);
-    svg.append('path')
-		.attr('d', pathString)
-		.style("stroke","#000000")
-	  	.style("stroke-width",5)
-	  	.style("fill", "none");
+	for (var i = 1; i <= 2; i++) { // in [1,2]
+		for (var d = 1; d <= 2; d++) { // in [1,2]
+			var j = ((i-1 + d) % 3) + 1;
+			if (i < j) {
+				
+				// line up the points on the (i,j)th line
+				var delta = [-b1,-b2];				
+				var myLine = [addArray(x1,delta), addArray(x2,delta)];
+				
+				if ((i==1) && (j==3)) { //1-3
+					delta = [b1,-b2];
+					myLine = [addArray(x1,delta), addArray(x3,delta)];
+				} else if ((i==2) && (j==3)) { //2-3
+					delta = [0,b1];
+					myLine = [addArray(x2,delta), addArray(x3,delta)];
+				}
+				
+				Ap = getSubgame(A,i,j);
+				
+				// equal competition:
+				if ((Ap[0] == Ap[2]) && (Ap[1] == Ap[3])) {
+					addLine(myLine,"neutral");
+					// no interior fixed points
+										
+				} else if ((Ap[0]-Ap[2])*(Ap[1]-Ap[3]) < 0) {
+					addLine(myLine); // solid line
+					
+					// there is an interior point:
+					var x_star = (Ap[3] - Ap[1])/ (Ap[0] - Ap[1] - Ap[2] + Ap[3] );
+					
+					var x = [0,0,0];
+					x[i-1]=x_star;
+					x[j-1]=1-x_star;					
+					
+
+					if ((Ap[0] < Ap[2]) && (Ap[1] > Ap[3])) {
+						// this interior point is stable:
+						addFixedPoint(addArray(UVW_to_XY(x),delta),"stable");
+						
+						// either end is unstable:
+						var vec = [i,j];
+						for (var ki = 0; ki < vec.length; ki++) {
+							var k = vec[ki];
+							var x = [0,0,0];
+							x[k-1]=1;
+							addFixedPoint(addArray(UVW_to_XY(x),delta),"unstable");
+						}
+					} else {
+						// this interior point is unstable:
+						addFixedPoint(addArray(UVW_to_XY(x),delta),"unstable");
+						
+						// either end is unstable:
+						var vec = [i,j];
+						for (var ki = 0; ki < vec.length; ki++) {
+							var k = vec[ki];
+							var x = [0,0,0];
+							x[k-1]=1;
+							addFixedPoint(addArray(UVW_to_XY(x),delta),"stable");
+						}
+					}
+				} else {
+					// i dominates j, or j dominates i:
+					addLine(myLine); // solid line
+					
+					// conditional logic:
+					var i_stable = ((Ap[0] >= Ap[2]) && (Ap[1] >= Ap[3]));					
+					
+					// is stable
+					var x = [0,0,0];
+					x[i-1]=1;
+					addFixedPoint(addArray(UVW_to_XY(x),delta),(i_stable ? "stable" : "unstable"));
+					
+					
+					// j is unstable
+					var x = [0,0,0];
+					x[j-1]=1;
+					addFixedPoint(addArray(UVW_to_XY(x),delta),(i_stable ? "unstable" : "stable"));
+						
+					
+				}
+			}
+		}
+	}	  	
 }
 
