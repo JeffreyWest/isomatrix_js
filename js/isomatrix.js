@@ -1,5 +1,10 @@
-function setupTriangle() {
+function setupTriangle(vi,type) {
 	
+	// just delete old triangles:
+// 	var svg = d3.select("svg");
+	d3.selectAll('svg').remove();
+	d3.selectAll('.to_remove').remove();
+	d3.selectAll('.downloadButton').remove();
 	
 	var width =document.getElementById("game-div").offsetWidth;	
 	var marginTop = 10,
@@ -7,6 +12,7 @@ function setupTriangle() {
 
     var div = d3.select(".board")
         .append("div")
+        .attr("class","to_remove")
         .style("top", marginTop + "px")
         .style("left", marginLeft + "px")
         .style("width", width + "px")
@@ -16,12 +22,12 @@ function setupTriangle() {
          .attr("width", width + "px")
          .attr("height", width + "px");
 		
-	isomatrix_background([],"velocity");
+	isomatrix_background_and_quiver(vi,type);
 	drawTriangle();
 	isomatrix_fixedpoint();
 	
 	
-	d3.select("body").append("button")
+	d3.select("#game-div").append("button")
         .attr("type","button")
         .attr("class", "downloadButton")
         .text("Download SVG")
@@ -32,7 +38,13 @@ function setupTriangle() {
 }
 
 
-	    
+function isomatrix_background_and_quiver(vi,type) {
+	setTimeout(function () {
+	  isomatrix_quiver();
+	}, 0);
+	isomatrix_background(vi,type);
+	
+}    
 
 
 // See https://en.wikipedia.org/wiki/Test_functions_for_optimization
@@ -146,11 +158,6 @@ function isomatrix_background(vi,type) {
 
 
 
-
-
-
-
-
 // draw fixed points on the edge of triangle   
 function isomatrix_fixedpoint() {
 	
@@ -255,4 +262,138 @@ function isomatrix_fixedpoint() {
 		}
 	}	  	
 }
+
+
+function tester() {
+	
+	
+	
+
+/*
+steps - The number of ODE steps to take.
+dt    - The step size.
+t     - (Optional) The initial time. If 'solve' has already been called
+      once, it can be called again to extend the solution, and this
+      value is not needed.
+pt    - (Optional) The initial point. Only needed for initial call to solve.
+*/
+
+	var steps = 360;
+	var dt = 0.01;
+	var pt = [1,1];
+
+
+	var R = ReplicatorEquation();
+	var pt2 = [0.5,0.5,0];
+	
+	var v2 = new ODE(R).solve(steps,dt,0,pt2);
+	
+	
+// 	isomatrix_quiver();
+	
+}
+
+function isomatrix_quiver() {
+	// get svg:
+	var svg = d3.select("svg");
+	var width =document.getElementById("game-div").offsetWidth;
+	
+	var x1 = UVW_to_XY([0.5,0.4,0.1]);
+	var x2 = UVW_to_XY([0.1,0.4,0.5]);
+	
+	// only need to add arrow defintion once:
+	svg.append("svg:defs").append("svg:marker")
+	    .attr("id", "triangle")
+	    .attr("refX", 2)
+	    .attr("refY", 2)
+	    .attr("markerWidth", 30)
+	    .attr("markerHeight", 30)
+	    .attr("orient", "auto")
+	    .append("path")
+	    .attr("d", "M 0 0 4 2 0 4 1.33 2")
+	    .style("fill", "#4a4a4a");
+	
+	
+    var step = 1/15;
+    var step0 =step/2;
+    var SCALAR = 10; // length of arrows
+    
+    var R = ReplicatorEquation();
+    
+	for (var P = 0; P < (1+step); P=P+step) {
+		for (var Q = 0; Q < (1+step); Q=Q+step) {			
+			if ((P < step0) || (Q < step0)) {
+				// outside of simplex:
+				
+			} else {
+				if ((P+Q) > (1-step0)) {
+					// outside of simplex:
+				} else {
+					
+					// from replicator dynamics:
+					var xdot = R(0,[P,Q,1-P-Q]);
+										
+					// vector in simplex-space:
+					var V = -xdot[0];
+	                var U = (xdot[2]-xdot[1])*Math.cos(Math.PI/3); 
+	                var mag = Math.sqrt(V*V + U*U);
+					
+					if (mag > 0){
+						// convert to x-y plot coordinates:
+						var x1 = UVW_to_XY([P,Q,1-P-Q]);
+						var x2 = [x1[0] + (SCALAR*U/mag), x1[1] + (SCALAR*V/mag)];
+											
+						addArrow(svg,x1,x2);
+					} else {
+						// add a dot (TK)
+					}
+					
+					
+				}
+			}
+		}
+	}
+}
+
+
+function addArrow(svg,x1,x2) {
+	//line              
+	svg.append("line")
+	  .attr("x1", x1[0])
+	  .attr("y1", x1[1])
+	  .attr("x2", x2[0])
+	  .attr("y2", x2[1])          
+	  .attr("stroke-width", 3)
+	  .attr("stroke", "#4a4a4a")
+	  .attr("marker-end", "url(#triangle)");
+}
+
+
+
+
+function ReplicatorEquation() {
+		
+	var RepEqn = function(t,pt) {
+		var A = getPayoff();
+		
+		var P = pt[0];
+		var Q = pt[1];
+		
+		var f1 = (A[0] - A[2] )*P + (A[1] - A[2])*Q + A[2];
+		var f2 = (A[0+3] - A[2+3] )*P + (A[1+3] - A[2+3])*Q + A[2+3];
+		var f3 = (A[0+6] - A[2+6] )*P + (A[1+6] - A[2+6])*Q + A[2+6];
+		var phi = P*f1 + Q*f2 + (1 - P - Q)*f3;
+		
+		var xdot = [];
+		xdot[0] = pt[0] * (f1 - phi);
+		xdot[1] = pt[1] * (f2 - phi)
+		xdot[2] = pt[2] * (f3 - phi)
+		return xdot;
+	}
+	return RepEqn;
+	
+	
+}
+
+
 

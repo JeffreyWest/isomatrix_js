@@ -187,16 +187,8 @@ var doctype = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C
   }
 
   function download(source) {
-    var filename = "untitled";
-
-    if (source.id) {
-      filename = source.id;
-    } else if (source.class) {
-      filename = source.class;
-    } else if (window.document.title) {
-      filename = window.document.title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    }
-
+    
+    var filename = "A=[" + getPayoff()+"]";
     var url = window.URL.createObjectURL(new Blob(source.source, { "type" : "text\/xml" }));
 
     var a = document.createElement("a");

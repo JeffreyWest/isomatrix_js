@@ -44,6 +44,7 @@ function addArray(x1,x2){
 	return x3;
 }
 
+// default: A=[.8,.9,.3;.9,.6,.5;.1,0,1];
 function getPayoff(randomize) {
 	var myArr = document.forms.inputField;
 	var myControls = myArr;
@@ -64,7 +65,7 @@ function getPayoff(randomize) {
 	  }
 	}
 	
-	return (randomize) ? isomatrix_background([],"velocity") : A;
+	return (randomize) ? setupTriangle([],"velocity") : A;
 }
 
 function getSubgame(A,i,j) {
@@ -146,6 +147,7 @@ function drawTriangle() {
 		  	.style("stroke-width",5)
 		  	.style("fill", "none");
 
+/*
 	var y1 = [0,0];
 	var y2 = [0,width];
 	var y4 = [width,0];
@@ -158,6 +160,7 @@ function drawTriangle() {
 			.style("stroke","#000000")
 		  	.style("stroke-width",5)
 		  	.style("fill", "none");
+*/
 }
 
 
