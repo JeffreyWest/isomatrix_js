@@ -23,13 +23,12 @@ function setupTriangle(vi,type) {
 		
 	isomatrix_background_and_quiver(vi,type);
 	drawTriangle();
-	
-	
-	
+		
 	d3.select("#game-div").append("button")
         .attr("type","button")
-        .attr("class", "downloadButton")
+        .attr("class", "downloadButton btn btn-success btn-lg")
         .text("Download SVG")
+        .style("margin-top","30px")
         .on("click", function() {
             // download the svg
             downloadSVG();
@@ -40,10 +39,7 @@ function setupTriangle(vi,type) {
 function isomatrix_background_and_quiver(vi,type) {
 	setTimeout(function () {
 		setTimeout(function () {
-			isomatrix_fixedpoint();	
-			isomatrix_background(vi,"nullclines");
-			
-					
+			isomatrix_fixedpoint();					
 	  	}, 0);
 	  	isomatrix_quiver();	  	
 	}, 0);	
@@ -102,6 +98,7 @@ function isomatrix_background(vi,type) {
 			Z = (P + Q > 1) ? NaN : Z;
 			
 			values[k] = isNaN(Z) ? 0 : Zfocal;
+// 			values[k] = Zfocal;
 		} else if (type == "fitness") {
 			
 			var Zfocal = phi;
@@ -115,12 +112,15 @@ function isomatrix_background(vi,type) {
 				Zfocal=f3;
 			}
 			
-			// don't draw if outside of circle
+			// don't draw if outside of triangle
 			Zfocal = ((P<0) || (P>1)) ? NaN : Zfocal;
 			Zfocal = ((Q<0) || (Q>1)) ? NaN : Zfocal;
 			Zfocal = (P + Q > 1) ? NaN : Zfocal;
 			
 			values[k] = isNaN(Zfocal) ? 0 : Zfocal;
+// 			values[k] = Zfocal;
+			
+			
 		} // end fitness
 		
 	  }
@@ -139,8 +139,8 @@ function isomatrix_background(vi,type) {
 	var color = d3.scaleLinear().domain(d3.extent(thresholds)).interpolate(function() { return d3.interpolateYlGnBu; });
 
 	if (vi>0) {
-		var myDomain = [thresholds[0],thresholds[(thresholds.length-1)/2],thresholds[thresholds.length-1]];
-		color = d3.scaleLinear().domain(myDomain).range(['#008dde','#fffdfb','#de0006']);
+		var myDomain = [thresholds[0],thresholds[(thresholds.length-1)/2-1],thresholds[(thresholds.length-1)/2],thresholds[thresholds.length-1]];
+		color = d3.scaleLinear().domain(myDomain).range(['#008dde','#fffdfb','#fffdfb','#de0006']);
 	}
 		
 	
@@ -148,37 +148,31 @@ function isomatrix_background(vi,type) {
 	var width =document.getElementById("game-div").offsetWidth;
 	
 	// add the nullclines:
-		var null_thresholds = determineThresholds(values,vi,2);
-		var null_contours = d3.contours()
-		    .size([n, m])
-		    .thresholds(null_thresholds);
-		
-		d3.select("svg").selectAll(".contours")
-		  .data(contours(values))
-		  .enter()
-		  .append("path")
-		  	.attr("class","contours")
-		    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
-		    .attr("fill", function(d) { 
-			    return color(d.value); });
-		
-// 		svg.selectAll(".nullclines").remove();
-		d3.select("svg").selectAll(".nullclines")
-		  .data(null_contours(values))
-		  .enter()
-		  .append("path")
-		  	.attr("class","nullclines")
-		    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
-			.attr("fill", "none")
-		    .attr("stroke",function(d,i) {
-			     if (vi>0) {
-				    return "black"; 
-			     } else {
-				  	return "none";   
-			     }
-			     })
-		    .attr("fill","none")
-		    .attr("stroke-width",4);
+	var null_thresholds = determineThresholds(values,vi,2);
+	var null_contours = d3.contours()
+	    .size([n, m])
+	    .thresholds(null_thresholds);
+	
+	d3.select("svg").selectAll(".contours")
+	  .data(contours(values))
+	  .enter()
+	  .append("path")
+	  	.attr("class","contours")
+	    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
+	    .attr("fill", function(d) { 
+		    return color(d.value); });
+	
+	d3.select("svg").selectAll(".nullclines")
+	  .data(null_contours(values))
+	  .enter()
+	  .append("path")
+	  	.attr("class","nullclines")
+	    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
+		.attr("fill", "none")
+	    .attr("stroke",(vi>0) ? "black" : "none" )
+	    .attr("fill","none")
+	    .style("stroke-dasharray", ("3, 3"))
+	    .attr("stroke-width",4);
 }
 
 
@@ -414,45 +408,6 @@ function isomatrix_quiver() {
 		}
 	}
 }
-
-
-
-function tester() {
-	
-// 	A = [.5,.5,.9,.4,.2,.2,.5,.6,1];
-	A = [1,.4,.4, .4,.3,.8, .8,.2,8];
-	
-	
-	
-/*
-	addFixedPoint(UVW_to_XY([1,0,0]), DetermineFixedPointType([1,0,0],A));
-    addFixedPoint(UVW_to_XY([0,1,0]), DetermineFixedPointType([0,1,0],A));
-    addFixedPoint(UVW_to_XY([0,0,1]), DetermineFixedPointType([0,0,1],A));
-*/
-	
-	
-	
-// 	console.log(hessian([1,0,0],A));
-
-
-/*
-steps - The number of ODE steps to take.
-dt    - The step size.
-t     - (Optional) The initial time. If 'solve' has already been called
-      once, it can be called again to extend the solution, and this
-      value is not needed.
-pt    - (Optional) The initial point. Only needed for initial call to solve.
-*/
-
-	var steps = 360;
-	var dt = 0.01;
-	var pt = [1,1];
-
-	var R = ReplicatorEquation();
-	var pt2 = [0.5,0.5,0];
-	var v2 = new ODE(R).solve(steps,dt,0,pt2);	
-}
-
 
 function hessian(x,A) {
 	

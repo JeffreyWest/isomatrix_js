@@ -151,6 +151,11 @@ function determineThresholds(values,vi,BINS){
 		    limit = p/(BINS)*(limits[1]-limits[0]) + limits[0];	    
 		    return limit; 
 		});
+		
+	if (BINS > 2) {
+		console.log(thresholds);
+	}
+	
 	
 	return thresholds;
 }
@@ -192,6 +197,19 @@ function drawTriangle() {
          var lineGenerator = d3.line();
          var pathString = lineGenerator(data);
          svg.append('path')
+			.attr('d', pathString)
+			.style("stroke","#000000")
+		  	.style("stroke-width",5)
+		  	.style("fill", "none");
+		  	
+	var y1 = [0,0];
+	var y2 = [0,width];
+	var y4 = [width,0];
+	var y3 = [width,width];
+	var data = [y1,y2,y3,y4,y1];
+         var lineGenerator = d3.line();
+         var pathString = lineGenerator(data);
+         svg.append('path')
 			.attr('d', pathString)
 			.style("stroke","#000000")
 		  	.style("stroke-width",5)
