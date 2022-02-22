@@ -2,6 +2,11 @@
 
 @import url(http://fonts.googleapis.com/css?family=PT+Serif|PT+Serif:b|PT+Serif:i|PT+Sans|PT+Sans:b);
 
+.nullclines {
+    z-index: 100;
+}
+
+
 .main {
 	max-width: 960px;
 }

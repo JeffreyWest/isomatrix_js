@@ -1,7 +1,6 @@
 function setupTriangle(vi,type) {
 	
 	// just delete old triangles:
-// 	var svg = d3.select("svg");
 	d3.selectAll('svg').remove();
 	d3.selectAll('.to_remove').remove();
 	d3.selectAll('.downloadButton').remove();
@@ -24,7 +23,7 @@ function setupTriangle(vi,type) {
 		
 	isomatrix_background_and_quiver(vi,type);
 	drawTriangle();
-	isomatrix_fixedpoint();
+	
 	
 	
 	d3.select("#game-div").append("button")
@@ -40,10 +39,15 @@ function setupTriangle(vi,type) {
 
 function isomatrix_background_and_quiver(vi,type) {
 	setTimeout(function () {
-	  isomatrix_quiver();
-	}, 0);
+		setTimeout(function () {
+			isomatrix_fixedpoint();	
+			isomatrix_background(vi,"nullclines");
+			
+					
+	  	}, 0);
+	  	isomatrix_quiver();	  	
+	}, 0);	
 	isomatrix_background(vi,type);
-	
 }    
 
 
@@ -124,7 +128,8 @@ function isomatrix_background(vi,type) {
 	
 	//////////////////////////////////////////////////
 	// draw the contours:
-	var thresholds = determineThresholds(values,vi);			
+	BINS = 8;
+	var thresholds = determineThresholds(values,vi,BINS);
 	var contours = d3.contours()
 	    .size([n, m])
 	    .thresholds(thresholds);
@@ -137,23 +142,43 @@ function isomatrix_background(vi,type) {
 		var myDomain = [thresholds[0],thresholds[(thresholds.length-1)/2],thresholds[thresholds.length-1]];
 		color = d3.scaleLinear().domain(myDomain).range(['#008dde','#fffdfb','#de0006']);
 	}
-	
-	
+		
 	
 	var svg = d3.select("svg");
 	var width =document.getElementById("game-div").offsetWidth;
-		
-	svg.selectAll("path").remove();
-	svg.selectAll("path")
-	  .data(contours(values))
-	  .enter()
-	  .append("path")
-	    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
-	    .attr("fill", function(d) { return color(d.value); });
 	
-	// re-draw the fixedpoints (not always necessary)
-	isomatrix_fixedpoint(width);
-
+	// add the nullclines:
+		var null_thresholds = determineThresholds(values,vi,2);
+		var null_contours = d3.contours()
+		    .size([n, m])
+		    .thresholds(null_thresholds);
+		
+		d3.select("svg").selectAll(".contours")
+		  .data(contours(values))
+		  .enter()
+		  .append("path")
+		  	.attr("class","contours")
+		    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
+		    .attr("fill", function(d) { 
+			    return color(d.value); });
+		
+// 		svg.selectAll(".nullclines").remove();
+		d3.select("svg").selectAll(".nullclines")
+		  .data(null_contours(values))
+		  .enter()
+		  .append("path")
+		  	.attr("class","nullclines")
+		    .attr("d", d3.geoPath(d3.geoIdentity().scale(width / n)))
+			.attr("fill", "none")
+		    .attr("stroke",function(d,i) {
+			     if (vi>0) {
+				    return "black"; 
+			     } else {
+				  	return "none";   
+			     }
+			     })
+		    .attr("fill","none")
+		    .attr("stroke-width",4);
 }
 
 
@@ -162,10 +187,12 @@ function isomatrix_background(vi,type) {
 function isomatrix_fixedpoint() {
 	
 	var svg = d3.select("svg");
-	svg.selectAll("line").remove(); // remove all lines
 	svg.selectAll("circle").remove(); // remove all fixed points
 	var width =document.getElementById("game-div").offsetWidth;
-
+	
+	//only need to add definitions once:
+	defineFixedPointTypes(svg);
+	
 	drawTriangle(); // redraw base triangle, bc we just deleted it
 	
 	
@@ -215,7 +242,8 @@ function isomatrix_fixedpoint() {
 
 					if ((Ap[0] < Ap[2]) && (Ap[1] > Ap[3])) {
 						// this interior point is stable:
-						addFixedPoint(addArray(UVW_to_XY(x),delta),"stable");
+						addFixedPoint(addArray(UVW_to_XY(x),delta),"sink");
+						addFixedPoint(UVW_to_XY(x), DetermineFixedPointType(x,A));
 						
 						// either end is unstable:
 						var vec = [i,j];
@@ -223,11 +251,12 @@ function isomatrix_fixedpoint() {
 							var k = vec[ki];
 							var x = [0,0,0];
 							x[k-1]=1;
-							addFixedPoint(addArray(UVW_to_XY(x),delta),"unstable");
+							addFixedPoint(addArray(UVW_to_XY(x),delta),"source");
 						}
 					} else {
 						// this interior point is unstable:
-						addFixedPoint(addArray(UVW_to_XY(x),delta),"unstable");
+						addFixedPoint(addArray(UVW_to_XY(x),delta),"source");
+						addFixedPoint(UVW_to_XY(x), DetermineFixedPointType(x,A));
 						
 						// either end is unstable:
 						var vec = [i,j];
@@ -235,7 +264,7 @@ function isomatrix_fixedpoint() {
 							var k = vec[ki];
 							var x = [0,0,0];
 							x[k-1]=1;
-							addFixedPoint(addArray(UVW_to_XY(x),delta),"stable");
+							addFixedPoint(addArray(UVW_to_XY(x),delta),"sink");
 						}
 					}
 				} else {
@@ -248,49 +277,80 @@ function isomatrix_fixedpoint() {
 					// is stable
 					var x = [0,0,0];
 					x[i-1]=1;
-					addFixedPoint(addArray(UVW_to_XY(x),delta),(i_stable ? "stable" : "unstable"));
+					addFixedPoint(addArray(UVW_to_XY(x),delta),(i_stable ? "sink" : "source"));
 					
 					
 					// j is unstable
 					var x = [0,0,0];
 					x[j-1]=1;
-					addFixedPoint(addArray(UVW_to_XY(x),delta),(i_stable ? "unstable" : "stable"));
+					addFixedPoint(addArray(UVW_to_XY(x),delta),(i_stable ? "source" : "sink"));
 						
 					
 				}
 			}
 		}
-	}	  	
+	}
+	
+	
+	// internal equilibriums: solve Ax = b for internal equil:    
+    aa = A[0]-A[2]-A[6]+A[8];
+    bb = A[1] - A[2] - A[7] + A[8];
+    cc = A[3]-A[5]-A[6]+A[8];
+    dd = A[4]-A[5]-A[7]+A[8];
+    
+    B1 = A[8] - A[2];
+    B2 = A[8] - A[5];	
+	
+	var det = aa*dd-bb*cc; //determinant: ad - bc
+	var Ainv = [dd/det,-bb/det,-cc/det,aa/det];
+
+    var p_star = Ainv[0]*B1 + Ainv[1]*B2;
+    var q_star = Ainv[2]*B1 + Ainv[3]*B2;
+        
+    if ((p_star > 0) && (q_star > 0) ) {
+	    if ((p_star < 1) && (q_star < 1) ) {
+		    if (p_star + q_star < 1) {
+			    var x_equil = [p_star,q_star,1-p_star-q_star];			    			    
+			    addFixedPoint(UVW_to_XY(x_equil), DetermineFixedPointType(x_equil,A));
+		    }
+	    }
+    }
+    
+    // 3 corners:
+    addFixedPoint(UVW_to_XY([1,0,0]), DetermineFixedPointType([1,0,0],A));
+    addFixedPoint(UVW_to_XY([0,1,0]), DetermineFixedPointType([0,1,0],A));
+    addFixedPoint(UVW_to_XY([0,0,1]), DetermineFixedPointType([0,0,1],A));
 }
 
+function DetermineFixedPointType(x,A) {
+	var type = "neutral";
 
-function tester() {
-	
-	
-	
-
-/*
-steps - The number of ODE steps to take.
-dt    - The step size.
-t     - (Optional) The initial time. If 'solve' has already been called
-      once, it can be called again to extend the solution, and this
-      value is not needed.
-pt    - (Optional) The initial point. Only needed for initial call to solve.
-*/
-
-	var steps = 360;
-	var dt = 0.01;
-	var pt = [1,1];
-
-
-	var R = ReplicatorEquation();
-	var pt2 = [0.5,0.5,0];
-	
-	var v2 = new ODE(R).solve(steps,dt,0,pt2);
-	
-	
-// 	isomatrix_quiver();
-	
+	var L = hessian(x,A);
+    var lambda1 = L[0];//real(lambda(1,1));
+    var lambda2 = L[1];//real(lambda(2,2));
+        
+    // fix numerical error for 0 eigenvalues
+    var eps = 0.000000001;    
+    lambda1 = (Math.abs(lambda1) < eps) ? 0 : lambda1;
+    lambda2 = (Math.abs(lambda2) < eps) ? 0 : lambda2;            
+    
+    if ((lambda1== 0) && (lambda2==0)) {
+	    type = "stable"; //  this is stable, but not asymptotically stable??? not sure TK
+    } else if (((lambda1== 0) && (lambda2>0)) || ((lambda1>0) && (lambda2==0)) ) {
+	    // one zero, one positive == UNSTABLE
+	    type = "semi-source";
+    } else if (((lambda1== 0) && (lambda2<0)) || ((lambda1< 0) && (lambda2==0)) ) {
+	    // one zero, one negative
+        type = "semi-sink";
+    } else if (lambda1*lambda2<0) {
+        type = "saddle";
+    } else if ((lambda1> 0) && (lambda2>0)) {
+        type = "source";
+    } else {
+        type = "sink";
+    }
+    
+	return type;
 }
 
 function isomatrix_quiver() {
@@ -356,44 +416,95 @@ function isomatrix_quiver() {
 }
 
 
-function addArrow(svg,x1,x2) {
-	//line              
-	svg.append("line")
-	  .attr("x1", x1[0])
-	  .attr("y1", x1[1])
-	  .attr("x2", x2[0])
-	  .attr("y2", x2[1])          
-	  .attr("stroke-width", 3)
-	  .attr("stroke", "#4a4a4a")
-	  .attr("marker-end", "url(#triangle)");
+
+function tester() {
+	
+// 	A = [.5,.5,.9,.4,.2,.2,.5,.6,1];
+	A = [1,.4,.4, .4,.3,.8, .8,.2,8];
+	
+	
+	
+/*
+	addFixedPoint(UVW_to_XY([1,0,0]), DetermineFixedPointType([1,0,0],A));
+    addFixedPoint(UVW_to_XY([0,1,0]), DetermineFixedPointType([0,1,0],A));
+    addFixedPoint(UVW_to_XY([0,0,1]), DetermineFixedPointType([0,0,1],A));
+*/
+	
+	
+	
+// 	console.log(hessian([1,0,0],A));
+
+
+/*
+steps - The number of ODE steps to take.
+dt    - The step size.
+t     - (Optional) The initial time. If 'solve' has already been called
+      once, it can be called again to extend the solution, and this
+      value is not needed.
+pt    - (Optional) The initial point. Only needed for initial call to solve.
+*/
+
+	var steps = 360;
+	var dt = 0.01;
+	var pt = [1,1];
+
+	var R = ReplicatorEquation();
+	var pt2 = [0.5,0.5,0];
+	var v2 = new ODE(R).solve(steps,dt,0,pt2);	
 }
 
 
+function hessian(x,A) {
+	
+	var D = [0,0,0,0];
+	for (var i = 0; i < 2; i++) {
+		for (var j = 0; j < 2; j++) {
+			if (i == j) {
+				var s1 = A[i*3+0]*x[0] + A[i*3+1]*x[1] + A[i*3+2]*x[2]; 
+				var t = [0,0,0];
+				
+				for (var k = 0; k < 3; k++) {
+					t[k]=x[0]*A[0*3+k] + x[1]*A[1*3+k] + x[2]*A[2*3+k];
+				}
+				
+				var s2 = -t[0]*x[0] -t[1]*x[1] -t[2]*x[2];				
+				var s3 = A[i*3 + 0]*x[0] + A[i*3 + 1]*x[1] + A[i*3 + 2]*x[2];
+				var s4 = A[0*3 + i]*x[0] + A[1*3 + i]*x[1] + A[2*3 + i]*x[2];
+				
+				D[i*2+j] = s1+s2 + ( A[i*3+i] - s3 - s4 )*x[i];
+								
+				// second part:		
+				s1 = A[2*3 + 0]*x[0] + A[2*3 + 1]*x[1] + A[2*3 + 2]*x[2];
+				s2 = A[0*3 + 2]*x[0] + A[1*3 + 2]*x[1] + A[2*3 + 2]*x[2];				
+				
+				D[i*2+j] = D[i*2+j] - (A[i*3+2] - s1 - s2)*x[i];				
+				
+			} else {
 
-
-function ReplicatorEquation() {
-		
-	var RepEqn = function(t,pt) {
-		var A = getPayoff();
-		
-		var P = pt[0];
-		var Q = pt[1];
-		
-		var f1 = (A[0] - A[2] )*P + (A[1] - A[2])*Q + A[2];
-		var f2 = (A[0+3] - A[2+3] )*P + (A[1+3] - A[2+3])*Q + A[2+3];
-		var f3 = (A[0+6] - A[2+6] )*P + (A[1+6] - A[2+6])*Q + A[2+6];
-		var phi = P*f1 + Q*f2 + (1 - P - Q)*f3;
-		
-		var xdot = [];
-		xdot[0] = pt[0] * (f1 - phi);
-		xdot[1] = pt[1] * (f2 - phi)
-		xdot[2] = pt[2] * (f3 - phi)
-		return xdot;
+				var s1 = A[j*3 + 0]*x[0] + A[j*3 + 1]*x[1] + A[j*3 + 2]*x[2];
+				var s2 = A[0*3 + j]*x[0] + A[1*3 + j]*x[1] + A[2*3 + j]*x[2];
+				
+				D[i*2+j]=( A[i*3+j] -   s1 -     s2   ) * x[i];
+				
+				var s3 = A[2*3 + 0]*x[0] + A[2*3 + 1]*x[1] + A[2*3 + 2]*x[2];
+				var s4 = A[0*3 + 2]*x[0] + A[1*3 + 2]*x[1] + A[2*3 + 2]*x[2];
+				D[i*2+j]=D[i*2+j] - (  A[i*3+2] -  s3  -   s4 )*x[i];				
+				
+			}		
+		}
 	}
-	return RepEqn;
 	
+	// load up math.js
+	const { eigs, multiply, column, transpose } = math
 	
+	var vals_and_vecs = eigs([[D[0],D[1]],[D[2],D[3]]]);
+	return vals_and_vecs.values;
 }
+
+
+
+
+
 
 
 

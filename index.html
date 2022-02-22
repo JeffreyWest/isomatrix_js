@@ -29,6 +29,10 @@
 		<!-- ode solver -->
 	    <script src="./js/GMA1D/ODE.js"></script>
 		<script src="./js/GMA1D/vector.js"></script>
+		
+		<!-- calculate eigenvalues -->
+		<script src="./js/bellbind/eigenvalues.js"></script>
+		<script src="./js/mathjs/math.js"></script>
 
 	    
 	    <script src="./js/isomatrix.js" charset="utf-8"></script>
@@ -68,6 +72,7 @@
 				  <div class="well well-lg">
 				  <!-- default: A=[0.8,0.9,0.3, 0.9,0.6,0.5, 0.1,0.0,1]; -->
 				    <form id="inputField" role="form">
+<!--
 				      <input type="text" id="field00" value="0.8" size="3">
 				      <input type="text" id="field01" value="0.9" size="3">
 				      <input type="text" id="field02" value="0.3" size="3">
@@ -79,6 +84,19 @@
 				      <input type="text" id="field20" value="0.1" size="3">
 				      <input type="text" id="field21" value="0.0" size="3">
 				      <input type="text" id="field22" value="1.0" size="3">
+-->
+
+					  <input type="text" id="field00" value="1.0" size="3">
+				      <input type="text" id="field01" value="0.4" size="3">
+				      <input type="text" id="field02" value="0.4" size="3">
+				      <br>
+				      <input type="text" id="field10" value="0.4" size="3">
+				      <input type="text" id="field11" value="0.3" size="3">
+				      <input type="text" id="field12" value="0.8" size="3">
+				      <br>
+				      <input type="text" id="field20" value="0.8" size="3">
+				      <input type="text" id="field21" value="0.2" size="3">
+				      <input type="text" id="field22" value="0.8" size="3">
 				    </form>
 				  </div>
 
@@ -122,6 +140,8 @@
 	
 	<script>
 		setupTriangle([],"velocity");
+		
+// 		tester();
 	</script>
 </body>
 </html>
