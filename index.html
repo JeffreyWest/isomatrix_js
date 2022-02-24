@@ -57,7 +57,16 @@
 	
 		<h1 style="margin-bottom: 30px;"> IsoMaTrix.js </h1>
 		
-		<p>IsoMaTrix is a software package that aids in the construction, analysis and visualization of three-strategy matrix games, originally published in <a href="https://academic.oup.com/bioinformatics/article/36/22-23/5542/6039115">Bioinformatics</a>. Below is a light-weight version of the software built in javascript. </p>
+		<p>IsoMaTrix is a software package that aids in the construction, analysis and visualization of three-strategy matrix games, originally published in <a href="https://academic.oup.com/bioinformatics/article/36/22-23/5542/6039115">Bioinformatics</a>. Below is a light-weight version of the software built in javascript. This provides a visualization for the replicator equation:</p>
+		
+		<p>
+			\( \dot{x}_i = x_i (f_i-\phi )\), 
+		</p>
+		
+		<p>
+			where \( f_i = \sum_j a_{ij}x_j\). Note: \( i,j \in [1,2,3]\) and \(a_{ij}\) are elements of the payoff matrix, A, such that \( [A]_{ij}=a_{ij}\).
+		</p>
+		
 			
 		<div class="row" style="margin-top: 30px;">
 			<div class="col-6 text-justify" id="game-div">
@@ -71,7 +80,7 @@
 			</div>
 			
 			<div class="col-5 offset-1 triangle">
-				<h4>Payoff Matrix</h4>
+				<h4>Payoff Matrix, A</h4>
 				<input type="button" id="game-button" name="randomA" value="Randomize" class="btn btn-success btn-lg" onclick="getPayoff(true)"></input></br></br>
 
 				  <div class="well well-lg">
